@@ -1,13 +1,7 @@
+
 import React, { useState } from 'react';
 import questions from './questions';
 import results from './results';
-
-const KNOWN_TYPES = Object.keys(results);
-
-const getClosestResultType = (type) => {
-  if (results[type]) return type;
-  return "IYLP"; // fallback
-};
 
 export default function PersonalityTest() {
   const [answers, setAnswers] = useState(Array(60).fill(0));
@@ -23,20 +17,22 @@ export default function PersonalityTest() {
   };
 
   const calculateResult = (scores) => {
-    const emotion = avg(scores, [...Array(15).keys()]);
-    const goal = avg(scores, [...Array(15).keys()].map(i => i + 15));
-    const energy = avg(scores, [...Array(15).keys()].map(i => i + 30));
-    const awareness = avg(scores, [...Array(15).keys()].map(i => i + 45));
-    const rawType =
+    const emotion = average(scores.slice(0, 15));
+    const goal = average(scores.slice(15, 30));
+    const energy = average(scores.slice(30, 45));
+    const awareness = average(scores.slice(45, 60));
+
+    const type =
       (emotion >= 3.5 ? 'E' : 'I') +
       (goal >= 3.5 ? 'Y' : 'P') +
       (energy >= 3.5 ? 'R' : 'L') +
       (awareness >= 3.5 ? 'P' : 'N');
-    const fixedType = getClosestResultType(rawType);
-    setResultType(fixedType);
+
+    if (results[type]) setResultType(type);
+    else setResultType("IYLP"); // fallback if type not found
   };
 
-  const avg = (arr, idxs) => idxs.reduce((sum, i) => sum + arr[i], 0) / idxs.length;
+  const average = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
 
   if (resultType) {
     const result = results[resultType];
